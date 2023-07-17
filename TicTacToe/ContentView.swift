@@ -30,6 +30,9 @@ struct ContentView: View {
         endPoint: .bottom
     )
     
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    
     var body: some View {
         VStack {
             Spacer()
@@ -76,6 +79,7 @@ struct ContentView: View {
                     Button {
                         array[0][0] = isCrossChecked
                         isCrossChecked.toggle()
+                        checkGameResult()
                     } label: {
                         Image(getImageName(state: array[0][0]))
                             .frame(width: 90, height: 90)
@@ -87,6 +91,7 @@ struct ContentView: View {
                     Button {
                         array[0][1] = isCrossChecked
                         isCrossChecked.toggle()
+                        checkGameResult()
                     } label: {
                         Image(getImageName(state: array[0][1]))
                             .frame(width: 90, height: 90)
@@ -98,6 +103,7 @@ struct ContentView: View {
                     Button {
                         array[0][2] = isCrossChecked
                         isCrossChecked.toggle()
+                        checkGameResult()
                     } label: {
                         Image(getImageName(state: array[0][2]))
                             .frame(width: 90, height: 90)
@@ -111,6 +117,7 @@ struct ContentView: View {
                     Button {
                         array[1][0] = isCrossChecked
                         isCrossChecked.toggle()
+                        checkGameResult()
                     } label: {
                         Image(getImageName(state: array[1][0]))
                             .frame(width: 90, height: 90)
@@ -122,6 +129,7 @@ struct ContentView: View {
                     Button {
                         array[1][1] = isCrossChecked
                         isCrossChecked.toggle()
+                        checkGameResult()
                     } label: {
                         Image(getImageName(state: array[1][1]))
                             .frame(width: 90, height: 90)
@@ -133,6 +141,7 @@ struct ContentView: View {
                     Button {
                         array[1][2] = isCrossChecked
                         isCrossChecked.toggle()
+                        checkGameResult()
                     } label: {
                         Image(getImageName(state: array[1][2]))
                             .frame(width: 90, height: 90)
@@ -146,6 +155,7 @@ struct ContentView: View {
                     Button {
                         array[2][0] = isCrossChecked
                         isCrossChecked.toggle()
+                        checkGameResult()
                     } label: {
                         Image(getImageName(state: array[2][0]))
                             .frame(width: 90, height: 90)
@@ -157,6 +167,7 @@ struct ContentView: View {
                     Button {
                         array[2][1] = isCrossChecked
                         isCrossChecked.toggle()
+                        checkGameResult()
                     } label: {
                         Image(getImageName(state: array[2][1]))
                             .frame(width: 90, height: 90)
@@ -168,6 +179,7 @@ struct ContentView: View {
                     Button {
                         array[2][2] = isCrossChecked
                         isCrossChecked.toggle()
+                        checkGameResult()
                     } label: {
                         Image(getImageName(state: array[2][2]))
                             .frame(width: 90, height: 90)
@@ -183,6 +195,11 @@ struct ContentView: View {
         .background(Color("backgroundColor"))
         .onAppear {
             startGame()
+        }
+        .alert(alertMessage, isPresented: $showingAlert) {
+            Button("OK", role: .cancel) {
+                startGame()
+            }
         }
     }
     
@@ -208,6 +225,134 @@ struct ContentView: View {
     
     func startGame() {
         isCrossChecked = Bool.random()
+        array = [
+            [nil, nil, nil],
+            [nil, nil, nil],
+            [nil, nil, nil]
+        ]
+    }
+    
+    func checkGameResult() {
+        guard let winner = checkForWinner() else {
+            var allBoxChecked = true
+            
+            for columns in 0..<3 {
+                for rows in 0..<3 {
+                    if array[rows][columns] == nil {
+                        allBoxChecked = false
+                    }
+                }
+            }
+            if allBoxChecked == true {
+                alertMessage = "Game Over!"
+                showingAlert = true
+            }
+            
+            return
+        }
+        if winner == true {
+            alertMessage = "cross won"
+        } else {
+            alertMessage = "circle won"
+        }
+        showingAlert = true
+    }
+    
+    func checkForWinner() -> Bool? {
+        var rows = 0
+        var columns = 0
+        
+        var allTrue = true
+        var allFalse = true
+        
+        //MARK: - COLUMN WISE ITERATION
+        
+        for columns in 0..<3 {
+            allTrue = true
+            allFalse = true
+            for rows in 0..<3 {
+                if array[rows][columns] != true {
+                    allTrue = false
+                }
+                if array[rows][columns] != false {
+                    allFalse = false
+                }
+                
+            }
+            if allTrue == true {
+                return true
+            }
+            if allFalse == true {
+                return false
+            }
+        }
+        //MARK: - ROW WISE ITERATION
+        
+        for rows in 0..<3 {
+            allTrue = true
+            allFalse = true
+            for columns in 0..<3 {
+                if array[rows][columns] != true {
+                    allTrue = false
+                }
+                if array[rows][columns] != false {
+                    allFalse = false
+                }
+            }
+            if allTrue == true {
+                return true
+            }
+            if allFalse == true {
+                return false
+            }
+        }
+        
+        //MARK: - LEFT DIAGONAL
+        allTrue = true
+        allFalse = true
+        while rows < 3 && columns < 3 {
+            if array[rows][columns] != true {
+                allTrue = false
+            }
+            if array[rows][columns] != false {
+                allFalse = false
+            }
+            
+            rows += 1
+            columns += 1
+        }
+        if allTrue == true {
+            return true
+        }
+        if allFalse == true {
+            return false
+        }
+
+        allTrue = true
+        allFalse = true
+
+        rows = 0
+        columns = array.count - 1
+    //MARK: - RIGHT DIAGONAL
+        while rows < array.count && columns >= 0 {
+            if array[rows][columns] != true {
+                allTrue = false
+            }
+            if array[rows][columns] != false {
+                allFalse = false
+            }
+            rows += 1
+            columns -= 1
+        }
+        
+        if allTrue == true {
+            return true
+        }
+        if allFalse == true {
+            return false
+        }
+        
+        return nil
     }
 }
 
